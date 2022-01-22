@@ -5,6 +5,7 @@ using UnityEngine.UI;
 
 public class Player : MonoBehaviour
 {
+    public DialogueTrigger dialogueTrigger;
     private Inventory inventory;
     public GameObject sword;
     public int currentHealth;
@@ -19,7 +20,7 @@ public class Player : MonoBehaviour
     private void Start()
     {
         inventory = GameObject.FindGameObjectWithTag("Player").GetComponent<Inventory>();
-
+        // dialogueTrigger.TriggerDialogue();
 
     }
     void Update()
@@ -53,6 +54,7 @@ public class Player : MonoBehaviour
         {
             sword.SetActive(true);
             animatorsword.SetTrigger("Attack");
+            CameraShake.Instance.Shake(2f, .1f);
             return;
         }
         if (inventory.slots[1].transform.childCount > 0)
