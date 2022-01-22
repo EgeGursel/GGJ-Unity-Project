@@ -19,6 +19,8 @@ public class Player : MonoBehaviour
     private void Start()
     {
         inventory = GameObject.FindGameObjectWithTag("Player").GetComponent<Inventory>();
+
+
     }
     void Update()
     {
@@ -32,18 +34,6 @@ public class Player : MonoBehaviour
 
         if (Input.GetKeyDown(KeyCode.Mouse0))
         {
-            for (int i = 0; i < inventory.slots.Length; i++)
-            {
-                if (inventory.slots[i].transform.childCount > 0)
-                {
-                    sword.SetActive(true);
-                    break;
-                } 
-                else
-                {
-                    return;
-                }
-            }
             Attack();
         }
     }
@@ -59,7 +49,22 @@ public class Player : MonoBehaviour
     }
     void Attack()
     {
-        animatorsword.SetTrigger("Attack");
+        if (inventory.slots[0].transform.childCount > 0)
+        {
+            sword.SetActive(true);
+            animatorsword.SetTrigger("Attack");
+            return;
+        }
+        if (inventory.slots[1].transform.childCount > 0)
+        {
+            //ADD NEW WEAPON(S)
+            // sword.SetActive(true);
+            return;
+        }
+        else
+        {
+            return;
+        }
     }
     void TakeDamage(int damage)
     {
