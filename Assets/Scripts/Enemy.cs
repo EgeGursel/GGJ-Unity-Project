@@ -120,7 +120,7 @@ public class Enemy : MonoBehaviour
     private void Flip()
     {
         facingDirection *= -1;
-        alive.transform.Rotate(0.0f, 180.0f, 0.0f)
+        alive.transform.Rotate(0.0f, 180.0f, 0.0f);
     }
     private void SwitchState(State state)
     {
