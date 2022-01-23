@@ -5,16 +5,16 @@ using TMPro;
 
 public class Dialogue : MonoBehaviour
 {
+    private Player player;
     public GameObject dialogueBox;
     public GameObject contButton;
     public TextMeshProUGUI dtext;
     public float TypingSpeed;
     public string[] sentences;
     private int index;
-    public int ended = 0;
     private void Start()
     {
-        ended = 0;
+        player = GameObject.Find("Player").GetComponent<Player>();
         dialogueBox.SetActive(true);
         contButton.SetActive(false);
         StartCoroutine(Type());
@@ -47,7 +47,7 @@ public class Dialogue : MonoBehaviour
         {
             dtext.text = "";
             dialogueBox.SetActive(false);
-            ended += 1;
+            player.DialogueEnd();
         }
     }
 }

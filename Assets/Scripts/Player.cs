@@ -5,12 +5,12 @@ using UnityEngine.UI;
 
 public class Player : MonoBehaviour
 {
-    private Dialogue dialogue;
     private Inventory inventory;
     public GameObject sword;
     public ParticleSystem dust;
     public Animator animator;
     public Animator animatorsword;
+    bool end = false;
 
     // HEALTH
     public int maxHealth = 100;
@@ -34,17 +34,15 @@ public class Player : MonoBehaviour
         currentHealth = maxHealth;
         healthbar.SetMaxHealth(currentHealth);
 
-        
-        dialogue = GameObject.Find("DialogueManager").GetComponent<Dialogue>();
         inventory = GameObject.FindGameObjectWithTag("Player").GetComponent<Inventory>();
     }
     private void Update()
     {
         // DELETE TO SKIP DIALOGUE
-        // if (dialogue.ended == 0)
-        // {
-        //    return;
-        // }
+        if (!end)
+        {
+            return;
+        }
 
         // PLAYER MOVEMENT
         horizontalMove = Input.GetAxisRaw("Horizontal") * runSpeed;
@@ -104,6 +102,10 @@ public class Player : MonoBehaviour
     {
         currentHealth -= damage;
         healthbar.SetHealth(currentHealth);
+    }
+    public void DialogueEnd()
+    {
+        end = true;
     }
 }
 
