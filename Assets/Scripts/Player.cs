@@ -39,10 +39,7 @@ public class Player : MonoBehaviour
     private void Update()
     {
         // DELETE TO SKIP DIALOGUE
-        if (!end)
-        {
-            return;
-        }
+        
 
         // PLAYER MOVEMENT
         horizontalMove = Input.GetAxisRaw("Horizontal") * runSpeed;
@@ -81,9 +78,8 @@ public class Player : MonoBehaviour
             // DAMAGE ENEMIES
             foreach (Collider2D enemy in hitEnemies)
             {
-                enemy.GetComponent<Enemy>().TakeDamage(attackDamage);
+                enemy.GetComponent<Enemy>().Damage(attackDamage);
             }
-
             CameraShake.Instance.Shake(2f, .1f);
             return;
         }
@@ -98,7 +94,7 @@ public class Player : MonoBehaviour
             return;
         }
     }
-    void TakeDamage(int damage)
+    public void TakeDamage(int damage)
     {
         currentHealth -= damage;
         healthbar.SetHealth(currentHealth);

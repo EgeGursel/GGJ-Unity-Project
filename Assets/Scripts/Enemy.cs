@@ -4,32 +4,55 @@ using UnityEngine;
 
 public class Enemy : MonoBehaviour
 {
-    private GameObject alive;
+    private State currentState;
 
-    public ParticleSystem blood;
-    public int maxHP;
-    int currHP;
+    [SerializeField]
+    private int
+        maxHealth;
+    [SerializeField]
+    private float
+        groundCheckDistance,
+        wallCheckDistance,
+        movementSpeed,
+        knockbackDuration;
+    [SerializeField]
+    private Transform
+        groundCheck,
+        wallCheck;
+    [SerializeField]
+    private LayerMask whatIsGround;
+    [SerializeField]
+    private Vector2 knockbackSpeed;
+    [SerializeField]
+    private ParticleSystem blood;
+    private int
+        currentHealth,
+        facingDirection,
+        damageDirection;
+    private float
+        knockbackStartTime;
+    private Vector2
+        movement;
+    private bool
+        groundDetected,
+        wallDetected;
+
+    public GameObject alive;
+    public Animator aliveAnim;
+    public Rigidbody2D aliveRB;
+
+    public Transform attackArea;
+    public float attackRange = 0.5f;
+    public LayerMask playerLayer;
+    public int attackDamage = 30;
     void Start()
     {
-        currHP = maxHP;
+        currentHealth = maxHealth; 
         alive = transform.Find("Alive").gameObject;
+        aliveAnim = alive.GetComponent<Animator>();
+        aliveRB = alive.GetComponent<Rigidbody2D>();
+        facingDirection = 1;
     }
-    public void TakeDamage (int damage)
-    {
-        currHP -= damage;
-        // ADD HURT ANIMATION
-
-        if (currHP <= 0)
-        {
-            Die();
-        }
-    }
-    void Die()
-    {
-        blood.Play();
-        Destroy(gameObject);
-    }
-
     // MOVEMENT
     private enum State
     {
@@ -40,7 +63,8 @@ public class Enemy : MonoBehaviour
     
     private void Update()
     {
-        switch(currentState)
+        AttackPlayer();
+        switch (currentState)
         {
             case State.Walking:
                 UpdateWalkingState();
@@ -53,23 +77,6 @@ public class Enemy : MonoBehaviour
                 break;
         }
     }
-    private State currentState;
-
-    [SerializeField]
-    private float
-        groundCheckDistance,
-        wallCheckDistance;
-    [SerializeField]
-    private Transform
-        groundCheck,
-        wallCheck;
-    [SerializeField]
-    private LayerMask whatIsGround;
-    private int facingDirection;
-    private bool
-        groundDetected,
-        wallDetected;
-
     // WALKING STATE
     private void EnterWalkingState()
     {
@@ -84,6 +91,11 @@ public class Enemy : MonoBehaviour
         {
             Flip();
         }
+        else
+        {
+            movement.Set(movementSpeed * facingDirection, aliveRB.velocity.y);
+            aliveRB.velocity = movement;
+        }
     }
     private void ExitWalkingState()
     {
@@ -92,20 +104,29 @@ public class Enemy : MonoBehaviour
     // KNOCKBACK STATE
     private void EnterKnockbackState()
     {
-
+        knockbackStartTime = Time.time;
+        movement.Set(knockbackSpeed.x * damageDirection, knockbackSpeed.y);
+        aliveRB.velocity = movement;
+        aliveAnim.SetBool("Knockback", true);
     }
     private void UpdateKnockbackState()
     {
-
+        if (Time.time > knockbackStartTime + knockbackDuration)
+        {
+            SwitchState(State.Walking); 
+        }
     }
     private void ExitKnockbackState()
     {
-
+        aliveAnim.SetBool("Knockback", false);
     }
     // DEAD STATE
     private void EnterDeadState()
     {
+        // SPAWN BLOOD PARTICLES & CHUNKS
+        blood.Play();
 
+        Destroy(gameObject);
     }
     private void UpdateDeadState()
     {
@@ -117,6 +138,36 @@ public class Enemy : MonoBehaviour
     }
 
     // OTHER FUNCTIONS
+    private void AttackPlayer()
+    {
+        // DETECT ENEMIES IN RANGE OF ATTACK
+        Collider2D[] hitPlayer = Physics2D.OverlapCircleAll(attackArea.position, attackRange, playerLayer);
+
+        // DAMAGE ENEMIES
+        foreach (Collider2D player in hitPlayer)
+        {
+            player.GetComponent<Player>().TakeDamage(attackDamage);
+        }
+        return;
+    }
+    private void OnDrawGizmos()
+    {
+        Gizmos.DrawLine(groundCheck.position, new Vector2(groundCheck.position.x, groundCheck.position.y - groundCheckDistance));
+        Gizmos.DrawLine(wallCheck.position, new Vector2(wallCheck.position.x + wallCheckDistance, wallCheck.position.y));
+    }
+    public void Damage(int damage)
+    {
+        currentHealth -= damage;
+        // ADD HURT ANIMATION
+        if (currentHealth > 0)
+        {
+            SwitchState(State.Knockback);
+        }
+        if (currentHealth < 0)
+        {
+            SwitchState(State.Dead);
+        }
+    }
     private void Flip()
     {
         facingDirection *= -1;
