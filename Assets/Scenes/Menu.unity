@@ -999,7 +999,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: le game
+  m_text: Light Alone
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8abc740a8c5722d4194ebda746c1bb6b, type: 2}
   m_sharedMaterial: {fileID: 3570362196030535341, guid: 8abc740a8c5722d4194ebda746c1bb6b, type: 2}
