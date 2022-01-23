@@ -4,13 +4,15 @@ using UnityEngine;
 
 public class Enemy : MonoBehaviour
 {
+    private GameObject alive;
+
     public ParticleSystem blood;
     public int maxHP;
     int currHP;
-    // Start is called before the first frame update
     void Start()
     {
         currHP = maxHP;
+        alive = transform.Find("Alive").gameObject;
     }
     public void TakeDamage (int damage)
     {
@@ -27,7 +29,7 @@ public class Enemy : MonoBehaviour
         blood.Play();
         Destroy(gameObject);
     }
-    
+
     // MOVEMENT
     private enum State
     {
@@ -35,6 +37,7 @@ public class Enemy : MonoBehaviour
         Knockback,
         Dead
     }
+    
     private void Update()
     {
         switch(currentState)
@@ -53,12 +56,16 @@ public class Enemy : MonoBehaviour
     private State currentState;
 
     [SerializeField]
+    private float
+        groundCheckDistance,
+        wallCheckDistance;
+    [SerializeField]
     private Transform
         groundCheck,
         wallCheck;
     [SerializeField]
     private LayerMask whatIsGround;
-
+    private int facingDirection;
     private bool
         groundDetected,
         wallDetected;
@@ -70,7 +77,13 @@ public class Enemy : MonoBehaviour
     }
     private void UpdateWalkingState()
     {
+        groundDetected = Physics2D.Raycast(groundCheck.position, Vector2.down, groundCheckDistance, whatIsGround);
+        wallDetected = Physics2D.Raycast(wallCheck.position, Vector2.right, wallCheckDistance, whatIsGround);
 
+        if (!groundDetected || wallDetected)
+        {
+            Flip();
+        }
     }
     private void ExitWalkingState()
     {
@@ -104,6 +117,11 @@ public class Enemy : MonoBehaviour
     }
 
     // OTHER FUNCTIONS
+    private void Flip()
+    {
+        facingDirection *= -1;
+        alive.transform.Rotate(0.0f, 180.0f, 0.0f)
+    }
     private void SwitchState(State state)
     {
         switch(currentState)
