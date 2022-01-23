@@ -8,37 +8,56 @@ public class Player : MonoBehaviour
     private Dialogue dialogue;
     private Inventory inventory;
     public GameObject sword;
-    public int currentHealth;
-    public CharacterController2D controller;
     public ParticleSystem dust;
     public Animator animator;
     public Animator animatorsword;
-    public Slider healthslider;
+
+    // HEALTH
+    public int maxHealth = 100;
+    public int currentHealth;
+    public HealthBar healthbar;
+
+    // MOVEMENT
+    public CharacterController2D controller;
     public float runSpeed = 40f;
     float horizontalMove = 0f;
     bool jump = false;
+
+    // ATTACK
+    public Transform attackArea;
+    public float attackRange = 1.05f;
+    public LayerMask enemyLayer;
+    public int attackDamage = 30;
+
     private void Start()
     {
-        dialogue = GameObject.FindObjectOfType<Dialogue>();
+        currentHealth = maxHealth;
+        healthbar.SetMaxHealth(currentHealth);
+
+        
+        dialogue = GameObject.Find("DialogueManager").GetComponent<Dialogue>();
         inventory = GameObject.FindGameObjectWithTag("Player").GetComponent<Inventory>();
     }
     private void Update()
     {
-        if (dialogue.ended == true)
+        // DELETE TO SKIP DIALOGUE
+        // if (dialogue.ended == 0)
+        // {
+        //    return;
+        // }
+
+        // PLAYER MOVEMENT
+        horizontalMove = Input.GetAxisRaw("Horizontal") * runSpeed;
+        animator.SetFloat("Speed", Mathf.Abs(horizontalMove));
+
+        if (Input.GetButtonDown("Jump"))
         {
-            // PLAYER MOVEMENT
-            horizontalMove = Input.GetAxisRaw("Horizontal") * runSpeed;
-            animator.SetFloat("Speed", Mathf.Abs(horizontalMove));
+            jump = true;
+        }
 
-            if (Input.GetButtonDown("Jump"))
-            {
-                jump = true;
-            }
-
-            if (Input.GetKeyDown(KeyCode.Mouse0))
-            {
-                Attack();
-            }
+        if (Input.GetKeyDown(KeyCode.Mouse0))
+        {
+            Attack();
         }
     }
     void FixedUpdate()
@@ -57,6 +76,16 @@ public class Player : MonoBehaviour
         {
             sword.SetActive(true);
             animatorsword.SetTrigger("Attack");
+
+            // DETECT ENEMIES IN RANGE OF ATTACK
+            Collider2D[] hitEnemies = Physics2D.OverlapCircleAll(attackArea.position, attackRange, enemyLayer);
+
+            // DAMAGE ENEMIES
+            foreach (Collider2D enemy in hitEnemies)
+            {
+                enemy.GetComponent<Enemy>().TakeDamage(attackDamage);
+            }
+
             CameraShake.Instance.Shake(2f, .1f);
             return;
         }
@@ -71,14 +100,10 @@ public class Player : MonoBehaviour
             return;
         }
     }
-    public void SetMaxHealth(int health)
+    void TakeDamage(int damage)
     {
-        healthslider.maxValue = health;
-        healthslider.value = health;
-    }
-    public void SetHealth(int health)
-    {
-        healthslider.value = health;
+        currentHealth -= damage;
+        healthbar.SetHealth(currentHealth);
     }
 }
 

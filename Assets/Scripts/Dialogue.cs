@@ -11,9 +11,10 @@ public class Dialogue : MonoBehaviour
     public float TypingSpeed;
     public string[] sentences;
     private int index;
-    public bool ended = false;
+    public int ended = 0;
     private void Start()
     {
+        ended = 0;
         dialogueBox.SetActive(true);
         contButton.SetActive(false);
         StartCoroutine(Type());
@@ -46,7 +47,7 @@ public class Dialogue : MonoBehaviour
         {
             dtext.text = "";
             dialogueBox.SetActive(false);
-            ended = true;
+            ended += 1;
         }
     }
 }
