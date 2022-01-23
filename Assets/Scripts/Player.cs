@@ -5,7 +5,7 @@ using UnityEngine.UI;
 
 public class Player : MonoBehaviour
 {
-    public DialogueTrigger dialogueTrigger;
+    private Dialogue dialogue;
     private Inventory inventory;
     public GameObject sword;
     public int currentHealth;
@@ -19,23 +19,26 @@ public class Player : MonoBehaviour
     bool jump = false;
     private void Start()
     {
+        dialogue = GameObject.FindObjectOfType<Dialogue>();
         inventory = GameObject.FindGameObjectWithTag("Player").GetComponent<Inventory>();
-        // dialogueTrigger.TriggerDialogue();
-
     }
-    void Update()
+    private void Update()
     {
-        horizontalMove = Input.GetAxisRaw("Horizontal") * runSpeed;
-        animator.SetFloat("Speed", Mathf.Abs(horizontalMove));
-
-        if (Input.GetButtonDown("Jump"))
+        if (dialogue.ended == true)
         {
-            jump = true;
-        }
+            // PLAYER MOVEMENT
+            horizontalMove = Input.GetAxisRaw("Horizontal") * runSpeed;
+            animator.SetFloat("Speed", Mathf.Abs(horizontalMove));
 
-        if (Input.GetKeyDown(KeyCode.Mouse0))
-        {
-            Attack();
+            if (Input.GetButtonDown("Jump"))
+            {
+                jump = true;
+            }
+
+            if (Input.GetKeyDown(KeyCode.Mouse0))
+            {
+                Attack();
+            }
         }
     }
     void FixedUpdate()
@@ -67,10 +70,6 @@ public class Player : MonoBehaviour
         {
             return;
         }
-    }
-    void TakeDamage(int damage)
-    {
-        currentHealth -= damage;
     }
     public void SetMaxHealth(int health)
     {
